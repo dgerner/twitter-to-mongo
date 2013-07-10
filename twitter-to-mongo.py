@@ -7,6 +7,8 @@ from tweepy.streaming import StreamListener
 from tweepy import OAuthHandler
 from tweepy import Stream
 import datetime
+import urllib
+import re
 
 # The MongoDB connection info. This assumes your database name is TwitterStream, and your collection name is tweets.
 connection = Connection('localhost', 27017)
@@ -28,6 +30,17 @@ access_token_secret = "ADD YOUR ACCESS TOKEN SECRET HERE"
 
 # The below code will get Tweets from the stream and store only the important fields to your database
 class StdOutListener(StreamListener):
+    
+    def get_quote(symbol):
+        base_url = 'http://finance.google.com/finance?q='
+        #Alternate url http://www.google.com/ig/api?stock=
+        content = urllib.urlopen(base_url + symbol).read()
+        m = re.search('id="ref_694653_l".*?>(.*?)<', content)
+        if m:
+            quote = m.group(1)
+        else:
+            quote = 'no quote available for: ' + symbol
+        return quote
 
     def on_data(self, data):
 
